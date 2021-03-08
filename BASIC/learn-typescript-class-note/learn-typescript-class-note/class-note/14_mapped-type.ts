@@ -1,4 +1,6 @@
 type Heroes = 'Hulk' | 'Capt' | 'Thor'
+// Heroes의 각 type들을 반복해서 돌려 :number타입을 정의함
+// K : 타입변수
 type HeroAges = { [K in Heroes]: number }
 const ages: HeroAges = {
   Hulk: 33,

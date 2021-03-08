@@ -13,15 +13,19 @@ import {
 } from './covid/index';
 
 // utils
+// document.querySelctor는 $로 사용가능하게 함
 function $(selector: string) {
   return document.querySelector(selector);
 }
+// 이미 기존에 있는 type(new Date)이기때문에 Date | string | number 이라고 type을 정의할 수있음
 function getUnixTimestamp(date: Date | string) {
   return new Date(date).getTime();
 }
 
 // DOM
 // let a: Element | HTMLElement | HTMLParagraphElement;
+// as : 타입단언, 달러표시의 결과가 어떤 타입(확장됨) 인지 단언함
+// 어떤태그의 확장된 element인지 index.html에서 보고 서로 타입간 호환할수있는형태로 타입을 정해줌
 const confirmedTotal = $('.confirmed-total') as HTMLSpanElement;
 const deathsTotal = $('.deaths') as HTMLParagraphElement;
 const recoveredTotal = $('.recovered') as HTMLParagraphElement;
@@ -64,7 +68,7 @@ enum CovidStatus {
 
 function fetchCountryInfo(
   countryName: string,
-  status: CovidStatus
+  status: CovidStatus // enum
 ): Promise<AxiosResponse<CountrySummaryResponse>> {
   // status params: confirmed, recovered, deaths
   const url = `https://api.covid19api.com/country/${countryName}/status/${status}`;
@@ -82,6 +86,7 @@ function initEvents() {
   rankList.addEventListener('click', handleListClick);
 }
 
+// async -> js를 ts로 바꿀 때 오류가 남 -> 컴파일 옵션추가(lib : ES2015)
 async function handleListClick(event: MouseEvent) {
   let selectedId;
   if (
@@ -102,6 +107,7 @@ async function handleListClick(event: MouseEvent) {
   isDeathLoading = true;
   const { data: deathResponse } = await fetchCountryInfo(
     selectedId,
+    // enum의 Deaths값을 넘겨줌(CovidStatus가 enum으로 돼있고 안에 어떤 속성이 있는지 자동완성으로 알 수 있다)
     CovidStatus.Deaths
   );
   const { data: recoveredResponse } = await fetchCountryInfo(
@@ -145,6 +151,7 @@ function clearDeathList() {
 }
 
 function setTotalDeathsByCountry(data: CountrySummaryResponse) {
+  // deathsTotal은 위에 class deaths로 잡은 DOM Element
   deathsTotal.innerText = data[0].Cases.toString();
 }
 

@@ -1,0 +1,671 @@
+# Typescript_실전
+
+[toc]
+
+## 유틸리티타입
+
+> [유틸리티타입](https://joshua1988.github.io/ts/usage/utility.html)
+>
+>  이미 정의해 놓은 타입을 변환할 때 사용하기 좋은 타입 문법
+>
+> 유틸리티 타입을 꼭 쓰지 않더라도 기존의 인터페이스, 제네릭 등의 기본 문법으로 충분히 타입을 변환할 수 있지만 유틸리티 타입을 쓰면 훨씬 더 간결한 문법으로 타입을 정의할 수 있다
+
+### Partial
+
+> 특정 타입의 부분 집합을 만족하는 타입을 정의
+
+```typescript
+interface Address {
+  email: string;
+  address: string;
+}
+
+type MayHaveEmail = Partial<Address>;
+const me: MayHaveEmail = {}; // 가능
+const you: MayHaveEmail = { email: 'test@abc.com' }; // 가능
+const all: MayHaveEmail = { email: 'capt@hero.com', address: 'Pangyo' }; // 가능
+
+//
+// Partial
+type UpdateProduct = Partial<Product>
+// 3. 특정 상품 정보를 업데이트(갱신)하는 함수
+function updateProductItem(productItem: Partial<Product>) {
+// productItem: Product라고 하면 모든 속성을 다 정의해줘야되는데 Partial<Product>는 Product타입의 속성을 전부 옵션으로 처리하게됨(선택적으로 집어 넣을 수 있다)
+}
+
+```
+
+![image-20210308130442457](Typescript_실전.assets/image-20210308130442457.png)
+
+- Partial 유틸리티 타입 구현하기
+
+```typescript
+// 4. 유틸리티 타입 구현하기 - Partial
+interface UserProfile {
+  username: string;
+  email: string;
+  profilePhotoUrl: string;
+}
+// interface UserProfileUpdate {
+//   username?: string;
+//   email?: string;
+//   profilePhotoUrl?: string;
+// }
+// #1 유저프로필 인터페이스로 type별칭 만듦 :  유저프로필 인터페이스의 속성을 이용해 type을 정의(옵셔널하게)
+// type UserProfileUpdate = {
+//   username?: UserProfile['username'];
+//   email?: UserProfile['email'];
+//   profilePhotoUrl?: UserProfile['profilePhotoUrl'];
+// }
+
+// #2(#1을 줄여나감)
+type UserProfileUpdate = {
+  // 맵드타입(Mapped type) 속성을 반복문처럼 도는데 UserPRofile의 한 키가 [p]에 들어옴, '?' 옵셔널 추가
+  [p in 'username' | 'email' | 'profilePhotoUrl']?: UserProfile[p]
+}
+type UserProfileKeys = keyof UserProfile
+
+// #3
+type UserProfileUpdate = {
+  // #2의 속성 키들은 'keyof'로 줄일 수 있음, UserProfile의 key들을 하나씩 내보냄
+  [p in keyof UserProfile]?: UserProfile[p]
+}
+
+// #4 이게 Partial의 구현모습(제너릭이용)
+type Subset<T> = {
+  [p in keyof T]?: T[p]
+}
+```
+
+
+
+### Pick
+
+>  특정 타입에서 몇 개의 속성을 선택(pick)하여 타입을 정의할 수 있다.
+
+```typescript
+// 2. 특정 상품의 상세 정보를 나타내기 위한 함수
+// Pick(유틸리티타입) : Product에서 id, name, price를 뽑을거야 -> 이걸 이용해서 interface를 변환해서 쓸 수 있다.
+type ShoppingItem = Pick<Product, 'id' | 'name' | 'price'>
+function displayProductDetail(shoppingItem: Pick<Product, 'id' | 'name' | 'price'>) {
+}
+```
+
+
+
+![image-20210308125712921](Typescript_실전.assets/image-20210308125712921.png)
+
+### Omit
+
+> 특정 타입에서 지정된 속성만 제거한 타입을 정의함
+
+```typescript
+interface AddressBook {
+  name: string;
+  phone: number;
+  address: string;
+  company: string;
+}
+const phoneBook: Omit<AddressBook, 'address'> = {
+  name: '재택근무',
+  phone: 12342223333,
+  company: '내 방'
+}
+const chingtao: Omit<AddressBook, 'address'|'company'> = {
+  name: '중국집',
+  phone: 44455557777
+}
+```
+
+## 맵드 타입(Mapped Type)
+
+> [맵드타입](https://joshua1988.github.io/ts/usage/mapped-type.html#%EB%A7%B5%EB%93%9C-%ED%83%80%EC%9E%85-mapped-type-%EC%9D%B4%EB%9E%80)
+>
+> 기존에 정의되어 있는 타입을 새로운 타입으로 변환해 주는 문법을 의미한다. 마치 자바스크립트 `map()` API 함수를 타입에 적용한 것과 같은 효과를 가짐
+
+### 맵드 타입의 기본 문법
+
+```typescript
+{ [ P in K ] : T }
+{ [ P in K ] ? : T }
+{ readonly [ P in K ] : T }
+{ readonly [ P in K ] ? : T }
+```
+
+```typescript
+type Heroes = 'Hulk' | 'Capt' | 'Thor'
+// Heroes의 각 type들을 반복해서 돌려 :number타입을 정의함
+type HeroAges = { [K in Heroes]: number }
+const ages: HeroAges = {
+  Hulk: 33,
+  Capt: 100,
+  Thor: 1000,
+}
+
+// for in 반복문 코드
+// var arr = ['a','b','c'];
+// for (var key in arr) {
+//   console.log(arr[key]);
+// }
+```
+
+![image-20210308132307935](Typescript_실전.assets/image-20210308132307935.png)
+
+-------
+
+>[참고 타입스크립트 핸드북](https://joshua1988.github.io/ts/etc/convert-js-to-ts.html#%EC%9E%90%EB%B0%94%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EC%97%90-%ED%83%80%EC%9E%85%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8-%EC%A0%81%EC%9A%A9%ED%95%98%EB%8A%94-%EC%A0%88%EC%B0%A8)
+
+## 자바스크립트 코드에 타입스크립트를 적용할 때 주의해야 할 점
+
+- 기능적인 변경은 절대 하지 않을 것
+- 테스트 커버리지가 낮을 땐 함부로 타입스크립트를 적용하지 않을 것
+- 처음부터 타입을 엄격하게 적용하지 않을 것 (점진적으로 strict 레벨을 증가)
+
+## 자바스크립트 프로젝트에 타입스크립트 적용하는 절차
+
+```sh
+TIP
+
+TLDR
+
+1. 타입스크립트 환경 설정 및 ts 파일로 변환
+2. any 타입 선언
+3. any 타입을 더 적절한 타입으로 변경
+```
+
+### 1. 타입스크립트 프로젝트 환경 구성
+
+- 프로젝트 생성 후 NPM 초기화 명령어로 `package.json` 파일을 생성
+- 프로젝트 폴더에서 `npm i typescript -D`로 타입스크립트 라이브러리를 설치
+
+```bash
+$ npm i typescript -D
+# 또는
+$ npm i typescript --save-dev
+```
+
+- 타입스크립트 설정 파일 `tsconfig.json`을 생성하고 기본 값을 추가
+
+```json
+{
+  "compilerOptions": {
+    // checkJs : @ts-check와 같은 효과를 내는 옵션
+    // js 파일을 ts파일로 인식해서 적용하겠다
+    "allowJs": true,
+    // tsc ts파일을 js(어떤버전)로 바꾸는것
+    "target": "ES5",
+    // ts결과물이 어디로 들어갈건가?
+    "outDir": "./dist",
+    // Promise를 인식시켜줌
+    "moduleResolution": "Node",
+    // ES2015 : async와같은 JS 최근 문법을 쓰기위해 추가
+    // DOM, DOM.Iterable : 소스코드 내에서 돔을 조절할것이기 때문에 추가함
+    "lib": ["ES2015", "DOM", "DOM.Iterable"],
+    // 타입을 정하기 어려운 곳이 있으면 명시적으로 any를 선언해야됨
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  // 프로젝트 기준으로 어떤 파일을 ts로 변환할거냐? src폴더 안의 app.js를 바꿈 src폴더안의 모든 파일을 대상으로 하겠다는 뜻
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+- 서비스 코드가 포함된 자바스크립트 파일을 타입스크립트 파일로 변환
+- 타입스크립트 컴파일 명령어 `tsc`로 타입스크립트 파일을 자바스크립트 파일로 변환
+
+### 2. 엄격하지 않은 타입 환경(loose type)에서 프로젝트 돌려보기
+
+- 프로젝트에 테스트 코드가 있다면 테스트 코드가 통과하는지 먼저 확인
+- 프로젝트의 `js` 파일을 모두 `ts` 파일로 변경(모두 -> 중요한파일먼저 점진적으로 바꿈)
+- 타입스크립트 컴파일 에러가 나는 것 위주로만 먼저 에러가 나지 않게 수정
+  - 여기서, **기능을 사소하게라도 변경하지 않도록 주의**
+- 테스트 코드가 성공하는지 확인합니다.
+
+### 3. 명시적인 `any` 선언하기
+
+- 프로젝트 테스트 코드가 통과하는지 확인
+- 타입스크립트 설정 파일(`tsconfig.json`)에 `noImplicitAny: true`를 추가
+- 가능한 타입을 적용할 수 있는 모든 곳에 타입을 적용
+  - 라이브러리를 쓰는 경우 [DefinitelyTyped](https://definitelytyped.org/)에서 `@types` 관련 라이브러리를 찾아 설치
+  - 만약, 타입을 정하기 어려운 곳이 있으면 명시적으로라도 `any`를 선언
+- 테스트 코드가 통과하는지 확인
+
+### 4. `strict` 모드 설정하기
+
+- 타입스크립트 설정 파일에 아래 설정을 추가
+
+```json
+{
+  "strict": true,
+  "strictNullChecks": true,
+  "strictFunctionTypes": true,
+  "strictBindCallApply": true,
+  "strictPropertyInitialization": true,
+  "noImplicitThis": true,
+  "alwaysStrict": true,
+}
+```
+
+- `any`로 되어 있는 타입을 최대한 더 적절한 타입으로 변환
+- `as`와 같은 키워드를 최대한 사용하지 않도록 고민해서 변경
+
+
+
+## Projects 코로나 세계 현황
+
+> - README.md
+>
+> ```markdown
+> ## 코로나 세계 현황판 만들기
+> 
+> 최종 프로젝트 폴더입니다
+> 
+> ## 자바스크립트 프로젝트에 타입스크립트 적용하기
+> 
+> 0. 자바스크립트 파일에 JSDoc으로 타입 시스템 입히기
+> 1. 타입스크립트의 기본 환경 구성
+>    - [x] NPM 초기화
+>    - [x] 타입스크립트 라이브러리 설치
+>    - [x] 타입스크립트 설정 파일 생성 및 기본 값 추가
+>    - [x] 자바스크립트 파일을 타입스크립트 파일로 변환
+>    - [x] `tsc` 명령어로 타입스크립트 컴파일 하기
+> 2. 명시적인 `any` 선언하기
+>    - `tsconfig.json` 파일에 `noImplicitAny` 값을 `true`로 추가
+>    - 가능한한 구체적인 타입으로 타입 정의
+> 3. 프로젝트 환경 구성
+>    - babel, eslint, prettier 등의 환경 설정
+> 4. 외부 라이브러리 모듈화
+> 
+> ## 참고 자료
+> 
+> - [존스 홉킨스 코로나 현황](https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6)
+> - [Postman API](https://documenter.getpostman.com/view/10808728/SzS8rjbc?version=latest#27454960-ea1c-4b91-a0b6-0468bb4e6712)
+> - [Type Vue without Typescript](https://blog.usejournal.com/type-vue-without-typescript-b2b49210f0b)
+> ```
+>
+> 
+>
+> - JSdoc 적용
+>
+> ```javascript
+> // @ts-check
+> 
+> // api
+> // JSdoc으로 기존 js파일에서 ts를 적용하는 법
+> /**
+>  * 
+>  * @typedef {object} CovidSummary
+>  * @property {Array<object>} Country
+>  */
+> 
+> /**
+>  * 
+>  * @returns {Promise<CovidSummary>}
+>  */
+> function fetchCovidSummary() {
+>   const url = 'https://api.covid19api.com/summary';
+>   return axios.get(url);
+> }
+> fetchCovidSummary().then(res => {
+>   console.log(res.Country)
+> })
+> ```
+>
+> - build를 했을 때 type 에러가 나는것과 runtime 에러가 나는건 독립적임, type에러는 홈페이지에 영향이 있는게 아니다->홈페이지는 돌아감
+
+- `index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>코로나 세계 현황</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Exo+2&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./main.css" />
+  </head>
+  <body>
+    <header class="flex justify-center">
+      <h1>코로나 세계 현황판</h1>
+    </header>
+    <main class="flex">
+      <div class="left-panel flex column">
+        <div class="total-board">
+          <p>Total Confirmed</p>
+          <span class="confirmed-total"></span>
+        </div>
+        <div class="country-ranks">
+          <p>Confirmed Cases by Country</p>
+          <ol class="rank-list"></ol>
+        </div>
+        <p class="last-updated-time flex justify-center align-center"></p>
+      </div>
+      <div class="right-panel">
+        <div class="summary-wrapper flex">
+          <div class="deaths-container">
+            <h3 class="summary-title">Total Deaths</h3>
+            <p class="total deaths">0</p>
+            <div class="list-wrapper">
+              <ol class="deaths-list"></ol>
+            </div>
+          </div>
+          <div class="recovered-container">
+            <h3 class="summary-title">Total Recovered</h3>
+            <p class="total recovered">0</p>
+            <div class="list-wrapper">
+              <ol class="recovered-list"></ol>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas
+            id="lineChart"
+            class="corona-chart"
+            style="width: 100%; height: 356px; background-color: #5b5656;"
+          ></canvas>
+        </div>
+      </div>
+    </main>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="./dist/app.js"></script>
+  </body>
+</html>
+
+```
+
+- `app.ts`
+
+```typescript
+// // 라이브러리 로딩
+// import 변수명 from '라이브러리 이름';
+// // 변수, 함수 임포트 문법
+// import {} from '파일 상대 경로';
+import axios, { AxiosResponse } from 'axios';
+import Chart from 'chart.js';
+// 타입 모듈
+import {
+  CountrySummaryResponse,
+  CovidSummaryResponse,
+  Country,
+  CountrySummaryInfo,
+} from './covid/index';
+
+// utils
+// document.querySelctor는 $로 사용가능하게 함
+function $(selector: string) {
+  return document.querySelector(selector);
+}
+// 이미 기존에 있는 type(new Date)이기때문에 Date | string | number 이라고 type을 정의할 수있음
+function getUnixTimestamp(date: Date | string) {
+  return new Date(date).getTime();
+}
+
+// DOM
+// let a: Element | HTMLElement | HTMLParagraphElement;
+// as : 타입단언, 달러표시의 결과가 어떤 타입(확장됨) 인지 단언함
+// 어떤태그의 확장된 element인지 index.html에서 보고 서로 타입간 호환할수있는형태로 타입을 정해줌
+const confirmedTotal = $('.confirmed-total') as HTMLSpanElement;
+const deathsTotal = $('.deaths') as HTMLParagraphElement;
+const recoveredTotal = $('.recovered') as HTMLParagraphElement;
+const lastUpdatedTime = $('.last-updated-time') as HTMLParagraphElement;
+const rankList = $('.rank-list');
+const deathsList = $('.deaths-list');
+const recoveredList = $('.recovered-list');
+const deathSpinner = createSpinnerElement('deaths-spinner');
+const recoveredSpinner = createSpinnerElement('recovered-spinner');
+
+function createSpinnerElement(id: string) {
+  const wrapperDiv = document.createElement('div');
+  wrapperDiv.setAttribute('id', id);
+  wrapperDiv.setAttribute(
+    'class',
+    'spinner-wrapper flex justify-center align-center'
+  );
+  const spinnerDiv = document.createElement('div');
+  spinnerDiv.setAttribute('class', 'ripple-spinner');
+  spinnerDiv.appendChild(document.createElement('div'));
+  spinnerDiv.appendChild(document.createElement('div'));
+  wrapperDiv.appendChild(spinnerDiv);
+  return wrapperDiv;
+}
+
+// state
+let isDeathLoading = false;
+
+// api
+function fetchCovidSummary(): Promise<AxiosResponse<CovidSummaryResponse>> {
+  const url = 'https://api.covid19api.com/summary';
+  return axios.get(url);
+}
+
+enum CovidStatus {
+  Confirmed = 'confirmed',
+  Recovered = 'recovered',
+  Deaths = 'deaths',
+}
+
+function fetchCountryInfo(
+  countryName: string,
+  status: CovidStatus // enum
+): Promise<AxiosResponse<CountrySummaryResponse>> {
+  // status params: confirmed, recovered, deaths
+  const url = `https://api.covid19api.com/country/${countryName}/status/${status}`;
+  return axios.get(url);
+}
+
+// methods
+function startApp() {
+  setupData();
+  initEvents();
+}
+
+// events
+function initEvents() {
+  rankList.addEventListener('click', handleListClick);
+}
+
+// async -> js를 ts로 바꿀 때 오류가 남 -> 컴파일 옵션추가(lib : ES2015)
+async function handleListClick(event: MouseEvent) {
+  let selectedId;
+  if (
+    event.target instanceof HTMLParagraphElement ||
+    event.target instanceof HTMLSpanElement
+  ) {
+    selectedId = event.target.parentElement.id;
+  }
+  if (event.target instanceof HTMLLIElement) {
+    selectedId = event.target.id;
+  }
+  if (isDeathLoading) {
+    return;
+  }
+  clearDeathList();
+  clearRecoveredList();
+  startLoadingAnimation();
+  isDeathLoading = true;
+  const { data: deathResponse } = await fetchCountryInfo(
+    selectedId,
+    // enum의 Deaths값을 넘겨줌(CovidStatus가 enum으로 돼있고 안에 어떤 속성이 있는지 자동완성으로 알 수 있다)
+    CovidStatus.Deaths
+  );
+  const { data: recoveredResponse } = await fetchCountryInfo(
+    selectedId,
+    CovidStatus.Recovered
+  );
+  const { data: confirmedResponse } = await fetchCountryInfo(
+    selectedId,
+    CovidStatus.Confirmed
+  );
+  endLoadingAnimation();
+  setDeathsList(deathResponse);
+  setTotalDeathsByCountry(deathResponse);
+  setRecoveredList(recoveredResponse);
+  setTotalRecoveredByCountry(recoveredResponse);
+  setChartData(confirmedResponse);
+  isDeathLoading = false;
+}
+
+function setDeathsList(data: CountrySummaryResponse) {
+  const sorted = data.sort(
+    (a: CountrySummaryInfo, b: CountrySummaryInfo) =>
+      getUnixTimestamp(b.Date) - getUnixTimestamp(a.Date)
+  );
+  sorted.forEach((value: CountrySummaryInfo) => {
+    const li = document.createElement('li');
+    li.setAttribute('class', 'list-item-b flex align-center');
+    const span = document.createElement('span');
+    span.textContent = value.Cases.toString();
+    span.setAttribute('class', 'deaths');
+    const p = document.createElement('p');
+    p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
+    li.appendChild(span);
+    li.appendChild(p);
+    deathsList.appendChild(li);
+  });
+}
+
+function clearDeathList() {
+  deathsList.innerHTML = null;
+}
+
+function setTotalDeathsByCountry(data: CountrySummaryResponse) {
+  // deathsTotal은 위에 class deaths로 잡은 DOM Element
+  deathsTotal.innerText = data[0].Cases.toString();
+}
+
+function setRecoveredList(data: CountrySummaryResponse) {
+  const sorted = data.sort(
+    (a: CountrySummaryInfo, b: CountrySummaryInfo) =>
+      getUnixTimestamp(b.Date) - getUnixTimestamp(a.Date)
+  );
+  sorted.forEach((value: CountrySummaryInfo) => {
+    const li = document.createElement('li');
+    li.setAttribute('class', 'list-item-b flex align-center');
+    const span = document.createElement('span');
+    span.textContent = value.Cases.toString();
+    span.setAttribute('class', 'recovered');
+    const p = document.createElement('p');
+    p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
+    li.appendChild(span);
+    li.appendChild(p);
+    recoveredList.appendChild(li);
+  });
+}
+
+function clearRecoveredList() {
+  recoveredList.innerHTML = null;
+}
+
+function setTotalRecoveredByCountry(data: CountrySummaryResponse) {
+  recoveredTotal.innerText = data[0].Cases.toString();
+}
+
+function startLoadingAnimation() {
+  deathsList.appendChild(deathSpinner);
+  recoveredList.appendChild(recoveredSpinner);
+}
+
+function endLoadingAnimation() {
+  deathsList.removeChild(deathSpinner);
+  recoveredList.removeChild(recoveredSpinner);
+}
+
+async function setupData() {
+  const { data } = await fetchCovidSummary();
+  setTotalConfirmedNumber(data);
+  setTotalDeathsByWorld(data);
+  setTotalRecoveredByWorld(data);
+  setCountryRanksByConfirmedCases(data);
+  setLastUpdatedTimestamp(data);
+}
+
+function renderChart(data: number[], labels: string[]) {
+  const lineChart = $('#lineChart') as HTMLCanvasElement;
+  const ctx = lineChart.getContext('2d');
+  Chart.defaults.global.defaultFontColor = '#f5eaea';
+  Chart.defaults.global.defaultFontFamily = 'Exo 2';
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Confirmed for the last two weeks',
+          backgroundColor: '#feb72b',
+          borderColor: '#feb72b',
+          data,
+        },
+      ],
+    },
+    options: {},
+  });
+}
+
+function setChartData(data: CountrySummaryResponse) {
+  const chartData = data
+    .slice(-14)
+    .map((value: CountrySummaryInfo) => value.Cases);
+  const chartLabel = data
+    .slice(-14)
+    .map((value: CountrySummaryInfo) =>
+      new Date(value.Date).toLocaleDateString().slice(5, -1)
+    );
+  renderChart(chartData, chartLabel);
+}
+
+function setTotalConfirmedNumber(data: CovidSummaryResponse) {
+  confirmedTotal.innerText = data.Countries.reduce(
+    (total: number, current: Country) => (total += current.TotalConfirmed),
+    0
+  ).toString();
+}
+
+function setTotalDeathsByWorld(data: CovidSummaryResponse) {
+  deathsTotal.innerText = data.Countries.reduce(
+    (total: number, current: Country) => (total += current.TotalDeaths),
+    0
+  ).toString();
+}
+
+function setTotalRecoveredByWorld(data: CovidSummaryResponse) {
+  recoveredTotal.innerText = data.Countries.reduce(
+    (total: number, current: Country) => (total += current.TotalRecovered),
+    0
+  ).toString();
+}
+
+function setCountryRanksByConfirmedCases(data: CovidSummaryResponse) {
+  const sorted = data.Countries.sort(
+    (a: Country, b: Country) => b.TotalConfirmed - a.TotalConfirmed
+  );
+  sorted.forEach((value: Country) => {
+    const li = document.createElement('li');
+    li.setAttribute('class', 'list-item flex align-center');
+    li.setAttribute('id', value.Slug);
+    const span = document.createElement('span');
+    span.textContent = value.TotalConfirmed.toString();
+    span.setAttribute('class', 'cases');
+    const p = document.createElement('p');
+    p.setAttribute('class', 'country');
+    p.textContent = value.Country;
+    li.appendChild(span);
+    li.appendChild(p);
+    rankList.appendChild(li);
+  });
+}
+
+function setLastUpdatedTimestamp(data: CovidSummaryResponse) {
+  lastUpdatedTime.innerText = new Date(data.Date).toLocaleString();
+}
+
+startApp();
+
+```
+
