@@ -4,6 +4,7 @@
 // import {} from '파일 상대 경로';
 import axios, { AxiosResponse } from 'axios';
 import Chart from 'chart.js';
+// import * as Chart from 'chart.js; //몇몇 라이브러리는 이렇게 적어줘야 에러가
 // 타입 모듈
 import {
   CountrySummaryResponse,
@@ -236,7 +237,9 @@ function setChartData(data: CountrySummaryResponse) {
 
 function setTotalConfirmedNumber(data: CovidSummaryResponse) {
   confirmedTotal.innerText = data.Countries.reduce(
+    // 각 요소를 더해서 누적해나감
     (total: number, current: Country) => (total += current.TotalConfirmed),
+    // 초기값은 0
     0
   ).toString();
 }

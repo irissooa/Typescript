@@ -5,7 +5,7 @@ export interface Country {
   NewConfirmed: number;
   NewDeaths: number;
   NewRecovered: number;
-  Premium: any;
+  Premium: any; // {} object의 안 구조를 알 수 없어서 any로 함
   Slug: string;
   TotalConfirmed: number;
   TotalDeaths: number;
@@ -20,7 +20,7 @@ interface Global {
   TotalDeaths: number;
   TotalRecovered: number;
 }
-
+// CovidSummary에서 받아온 정보를 interface로 정의
 export interface CovidSummaryResponse {
   Countries: Country[];
   Date: string;
@@ -41,4 +41,5 @@ export interface CountrySummaryInfo {
   Status: string;
 }
 
+// CountrySummaryInfo를 배열로 갖는 type정의
 export type CountrySummaryResponse = CountrySummaryInfo[];
