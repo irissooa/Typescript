@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    // checkJs : @ts-check와 같은 효과를 내는 옵션
+    // js 파일을 ts파일로 인식해서 적용하겠다
+    "allowJs": true,
+    // tsc ts파일을 js(어떤버전)로 바꾸는것
+    "target": "ES5",
+    // ts결과물이 어디로 들어갈건가?
+    "outDir": "./dist",
+    // Promise를 인식시켜줌
+    "moduleResolution": "Node",
+    // ES2015 : async와같은 JS 최근 문법을 쓰기위해 추가
+    // DOM, DOM.Iterable : 소스코드 내에서 돔을 조절할것이기 때문에 추가함
+    "lib": ["ES2015", "DOM", "DOM.Iterable"],
+    // 타입을 정하기 어려운 곳이 있으면 명시적으로 any를 선언해야됨
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  // 프로젝트 기준으로 어떤 파일을 ts로 변환할거냐? src폴더 안의 app.js를 바꿈 src폴더안의 모든 파일을 대상으로 하겠다는 뜻
+  "include": ["./src/**/*"]
+}

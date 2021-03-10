@@ -1,0 +1,12 @@
+// tsc로 컴파일을 할때 tsconfig.json파일로 옵션을 줄 수있음
+{
+  "compilerOptions": {
+    // 이 프로젝트에 js파일을 허용하겠다
+    "allowJs": true,
+    // //@ts-check 이 역할과 같은 기능
+    "checkJs": true,
+    // 최소한의 기본타입 하난 넣어야되는 속성
+    // type을  :any라도 적어달란 말
+    "noImplicitAny": true
+  }
+}
