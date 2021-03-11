@@ -16,7 +16,9 @@
     "noImplicitAny": true,
     "esModuleInterop": true,
     // typeRoots는 따로 설정해주지 않으면 "./node_modules/@types" 이게 기본 경로(@types 안의 폴더를 다 뒤져서 index.d.ts파일을 읽음),거기에 types라고 내가 정의한 폴더를 추가해서 라이브러리 이름으로 폴더를 만든 뒤 'index.d.ts'파일을 만들어서 설정해줌
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "typeRoots": ["./node_modules/@types", "./types"],
+    // 엄격한 type으로 정의하기위해
+    "strict":true,
   },
   // 프로젝트 기준으로 어떤 파일을 ts로 변환할거냐? src폴더 안의 app.js를 바꿈 src폴더안의 모든 파일을 대상으로 하겠다는 뜻
   "include": ["./src/**/*"]

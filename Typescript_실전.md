@@ -255,8 +255,8 @@ $ npm i typescript --save-dev
 
 ## Projects 코로나 세계 현황
 
-> - README.md
->
+- `README.md`
+
 > ```markdown
 > ## 코로나 세계 현황판 만들기
 > 
@@ -285,8 +285,6 @@ $ npm i typescript --save-dev
 > - [Type Vue without Typescript](https://blog.usejournal.com/type-vue-without-typescript-b2b49210f0b)
 > ```
 >
-> 
->
 > - JSdoc 적용
 >
 > ```javascript
@@ -314,6 +312,235 @@ $ npm i typescript --save-dev
 > ```
 >
 > - build를 했을 때 type 에러가 나는것과 runtime 에러가 나는건 독립적임, type에러는 홈페이지에 영향이 있는게 아니다->홈페이지는 돌아감
+
+### 타입스크립트 프로젝트 환경 구성
+
+> 1. 프로젝트 폴더 생성
+>
+> 2. `npm init -y`로 `package.json` 파일 생성
+>
+> 3. 아래 명령어로 타입스크립트 및 문법 검사(ESLint), 코드 정리 도구(prettier) 라이브러리 추가
+>
+> - babel : 최신 자바스크립트 문법을 오래된 브라우저에서도 호환가능한 자바스크립트로 변환해주는 도구
+> - ESLint : 자바스크립트 코드를 에러가 덜 나는 방향으로 작성하도록 도와주는 문법 보조 도구
+>
+> ```sh
+> $ npm i -D typescript @babel/core @babel/preset-env @babel/preset-typescript @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint prettier eslint-plugin-prettier
+> ```
+>
+> - `package.json`에 depedencies에 typescript가 있으면 uninstall 한 뒤 위 코드를 적어 devdependencies로 깔아야됨
+> - dependencies : 배포에 포함되는 라이브러리, devdependencies : 배포에 포함되지 않는 라이브러리
+>
+> 4. 프로젝트 폴더 바로 아래에 ESLint 설정 파일 추가 
+>
+> > `.eslintrc.js` 앞의 `.`은 숨김파일이란 뜻이고, `rc`는 설정파일이란 뜻, `js,json, yml`의 확장자를 가질 수 있는데 js는 주석, 다른 파일내용 병합가능해서 js를 선호함(개인적의견) 
+>
+> ```js
+> // .eslintrc.js
+> module.exports = {
+>   root: true,
+>   env: {
+>     browser: true,
+>     node: true,
+>   },
+>   extends: [
+>     'eslint:recommended',
+>     'plugin:@typescript-eslint/eslint-recommended',
+>     'plugin:@typescript-eslint/recommended',
+>   ],
+>   plugins: ['prettier', '@typescript-eslint'],
+>   rules: {
+>     'prettier/prettier': [
+>      // 규칙에 안맞으면 error('빨간줄')로 간주함('warn' : 노란줄 쳐짐) 
+>      'error',
+>       {
+>         singleQuote: true,
+>         semi: true, // ';' : 세미콜론
+>         useTabs: false,
+>         tabWidth: 2, // tab간격
+>         printWidth: 80,
+>         bracketSpacing: true,
+>         arrowParens: 'avoid',
+>       },
+>     ],
+>   },
+>   parserOptions: {
+>     parser: '@typescript-eslint/parser',
+>   },
+> };
+> ```
+>
+> 5. ESLint 이그노어 파일 추가
+>
+> - `.eslintignore` : eslint의 대상이되지 않는 것
+>
+> ```
+> // .eslintignore
+> 
+> node_modules
+> dist
+> ```
+
+### VSCode ESLint 플러그인 관련 설정
+
+> 1. VSCode의 [ESLint 플러그인](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) 설치
+>
+> 2. VSCode에서 `ctrl` + `shift` + `p` / `cmd` + `shift` + `p` 키를 이용하여 명령어 실행 창 표시
+>
+> 3. 명령어 실행 창에 `open settings (json)` 입력 후 선택
+>
+> ![image-20210310203527673](Typescript_실전.assets/image-20210310203527673.png)
+>
+> 4. VSCode 사용자 정의 파일인 `settings.json` 파일의 내용에 아래와 같이 ESLint 플러그인 관련 설정 추가.
+>
+> ```js
+> {
+>   // ... <-- 기존 내용을 꼭 유지한 상태에서 아래 내용을 추가하고 이 주석은 제거할 것
+>   "editor.codeActionsOnSave": {
+>       "source.fixAll.eslint": true
+>   },
+>   "eslint.alwaysShowStatus": true,
+>   "eslint.workingDirectories": [
+>       {"mode": "auto"}
+>   ],
+>   "eslint.validate": [
+>       "javascript",
+>       "typescript"
+>   ]
+> }
+> ```
+>
+> 5. `ctrl` + `,` 또는 `cmd` + `,` 눌러서 VSCode 설정 파일(Settings)에 들어간 후 `format on save` 검색. 아래와 같이 체크가 안되어 있는지 확인.
+>
+> ![image-20210310203653029](Typescript_실전.assets/image-20210310203653029.png)
+>
+> 이렇게 설정을 하면 `app.ts`에 `var a = 10;`이라고 쓰면 `const a = 10;` 
+
+### WHY tslint가 아닌 eslint를 쓰는가?
+
+> - tslint보다 eslint의 성능이 더 좋음
+
+### 외부라이브러리 모듈화
+
+> - npm 으로 설치
+>
+> ```sh
+> $ npm i axios
+> ```
+>
+> - `app.ts` 에 import해줌
+>
+> ```typescript
+> import axios from 'axios';
+> ```
+>
+> - chart.js npm 설치
+>
+> ```sh
+> $ npm install chart.js
+> ```
+>
+> - chart.js는 `app.ts`에 import하려고 해도 안됨 typescript에서 인식이 안됨
+
+### typescript에서 인식되지 않는 외부라이브러리 설정방법
+
+> - 해당 라이브러리 `alt`누른뒤 누르면 `node_modules`폴더안의 해당 라이브러리 폴더로 이동함
+> - axios는 ts로 변환된 파일이 같이 폴더에 들어있기 때문에 에러가 나지 않았고, `chart.js`는 js파일 밖에 없어서 에러가 났다
+> - 이랬을 때 에러코드에 `npm install --save @types/chartjs`를 하라고 뜸! 이 코드를 검색을 통해 npm 공식문서에 검색해 보면 `npm install @types/chart.js --save-dev`라는 코드를 써야된다고 뜬다 그럼 이걸 깔아주면 됨
+>
+> ```sh
+> $ npm install @types/chart.js --save-dev
+> ```
+>
+> - 이렇게 하면 `app.ts`에서 import 하는 'chart.js' 에 에러가안남(해당 라이브러리의 ts 선언 파일을 설치 : `node_modules > @types > '해당 라이브러리 폴더' > index.d.ts`)
+> - axios는 잘만들어진 api이기 때문에 내부적으로 `index.d.ts`파일이 없지만 대다수의 라이브러리는 이게 없어서 이렇게 검색하고 따로 설치가 필요하다
+
+### Definitly Typed(`@types/`)
+
+> [Definitly Typed Github](https://github.com/DefinitelyTyped/DefinitelyTyped)
+>
+> [Typescript npm 공식사이트](https://www.typescriptlang.org/dt/search?search=)
+>
+> - javascript 라이브러리를 typescript에 적용시킴 `@types/`
+
+### `@types`가 제공되지 않는 외부라이브러리 적용 방법
+
+> - 없다면 직접 `index.d.ts`파일을 만들어서 적용시켜줘야됨
+> - `tsconfig.json`파일에 `typeRoots`를 설정해줌
+>
+> ```json
+> {
+>      // typeRoots는 따로 설정해주지 않으면 "./node_modules/@types" 이게 기본 경로(@types 안의 폴더를 다 뒤져서 index.d.ts파일을 읽음),거기에 types라고 내가 정의한 폴더를 추가해서 라이브러리 이름으로 폴더를 만든 뒤 'index.d.ts'파일을 만들어서 설정해줌
+>     "typeRoots": ["./node_modules/@types", "./types"]
+> }
+> ```
+>
+> - `types/chart.js/index.d.ts`
+>
+> ```typescript
+> declare module 'chart.js' {
+>     // .. 구체적 내용 설정 가능함
+> }
+> ```
+
+### api함수 typescript
+
+> type을 따로 파일로 만들어서 export함
+
+- `covid > index.ts`
+
+```typescript
+export interface Country {
+  Country: string;
+  CountryCode: string;
+  Date: string;
+  NewConfirmed: number;
+  NewDeaths: number;
+  NewRecovered: number;
+  Premium: any; // {} object의 안 구조를 알 수 없어서 any로 함
+  Slug: string;
+  TotalConfirmed: number;
+  TotalDeaths: number;
+  TotalRecovered: number;
+}
+
+interface Global {
+  NewConfirmed: number;
+  NewDeaths: number;
+  NewRecovered: number;
+  TotalConfirmed: number;
+  TotalDeaths: number;
+  TotalRecovered: number;
+}
+// CovidSummary에서 받아온 정보를 interface로 정의
+export interface CovidSummaryResponse {
+  Countries: Country[];
+  Date: string;
+  Global: Global;
+  Message: string;
+}
+
+export interface CountrySummaryInfo {
+  Cases: number;
+  City: string;
+  CityCode: string;
+  Country: string;
+  CountryCode: string;
+  Date: string;
+  Lat: string;
+  Lon: string;
+  Province: string;
+  Status: string;
+}
+
+// CountrySummaryInfo를 배열로 갖는 type정의
+export type CountrySummaryResponse = CountrySummaryInfo[];
+
+```
+
+
+
+
 
 - `index.html`
 
@@ -387,8 +614,10 @@ $ npm i typescript --save-dev
 // import 변수명 from '라이브러리 이름';
 // // 변수, 함수 임포트 문법
 // import {} from '파일 상대 경로';
+// axios의 응답으로 오는 type이 AxiosResponse 반환값 Promise<AxiosResponse<any>> 이런식으로 type을 적음
 import axios, { AxiosResponse } from 'axios';
 import Chart from 'chart.js';
+// import * as Chart from 'chart.js; //몇몇 라이브러리는 이렇게 적어줘야 에러가
 // 타입 모듈
 import {
   CountrySummaryResponse,
@@ -402,11 +631,10 @@ import {
 function $(selector: string) {
   return document.querySelector(selector);
 }
-// 이미 기존에 있는 type(new Date)이기때문에 Date | string | number 이라고 type을 정의할 수있음
+// 이미 기존에 있는 type(new Date)이기때문에 Date | string | number 이라고 type을 정의할 수있음, 대부분 Date는 string으로 들어올 수 있어서 string타입까지 받게 하면됨
 function getUnixTimestamp(date: Date | string) {
   return new Date(date).getTime();
 }
-
 // DOM
 // let a: Element | HTMLElement | HTMLParagraphElement;
 // as : 타입단언, 달러표시의 결과가 어떤 타입(확장됨) 인지 단언함
@@ -421,6 +649,7 @@ const recoveredList = $('.recovered-list');
 const deathSpinner = createSpinnerElement('deaths-spinner');
 const recoveredSpinner = createSpinnerElement('recovered-spinner');
 
+// 로딩되고있다고 인지시켜주는 spinner
 function createSpinnerElement(id: string) {
   const wrapperDiv = document.createElement('div');
   wrapperDiv.setAttribute('id', id);
@@ -511,7 +740,7 @@ async function handleListClick(event: MouseEvent) {
   setChartData(confirmedResponse);
   isDeathLoading = false;
 }
-
+// data가 CountrySummaryResponse 타입이면 CountrySummaryResponsesms  CountrySummaryInfo 이루어진 배열이기 떄문에 안의 a,b 요소는 CountrySummaryInfo 타입이 된다
 function setDeathsList(data: CountrySummaryResponse) {
   const sorted = data.sort(
     (a: CountrySummaryInfo, b: CountrySummaryInfo) =>
@@ -521,6 +750,7 @@ function setDeathsList(data: CountrySummaryResponse) {
     const li = document.createElement('li');
     li.setAttribute('class', 'list-item-b flex align-center');
     const span = document.createElement('span');
+    // span의 textContent는 string인데 value의 Cases는 number이기 때문에 type을 맞추기 위해 toString으로 맞춰줌
     span.textContent = value.Cases.toString();
     span.setAttribute('class', 'deaths');
     const p = document.createElement('p');
@@ -585,8 +815,9 @@ async function setupData() {
   setCountryRanksByConfirmedCases(data);
   setLastUpdatedTimestamp(data);
 }
-
+//   renderChart(chartData, chartLabel);이렇게 보낼때 data는 number 배열, label은 string배열
 function renderChart(data: number[], labels: string[]) {
+  // 방법 2개 있음 아래처럼 lineChart를 따로 분리해서 타입단언 해도되고, ctx에서 바로 타입단언을 해줘도됨
   const lineChart = $('#lineChart') as HTMLCanvasElement;
   const ctx = lineChart.getContext('2d');
   Chart.defaults.global.defaultFontColor = '#f5eaea';
@@ -610,7 +841,7 @@ function renderChart(data: number[], labels: string[]) {
 
 function setChartData(data: CountrySummaryResponse) {
   const chartData = data
-    .slice(-14)
+    .slice(-14) // 최근 14일(2주)
     .map((value: CountrySummaryInfo) => value.Cases);
   const chartLabel = data
     .slice(-14)
@@ -622,9 +853,11 @@ function setChartData(data: CountrySummaryResponse) {
 
 function setTotalConfirmedNumber(data: CovidSummaryResponse) {
   confirmedTotal.innerText = data.Countries.reduce(
+    // 각 요소를 더해서 누적해나감
     (total: number, current: Country) => (total += current.TotalConfirmed),
+    // 초기값은 0
     0
-  ).toString();
+  ).toString(); // 안의 값이 숫자! 문자로 바꾸는 api가 toString()
 }
 
 function setTotalDeathsByWorld(data: CovidSummaryResponse) {
@@ -667,5 +900,472 @@ function setLastUpdatedTimestamp(data: CovidSummaryResponse) {
 
 startApp();
 
+```
+
+- typescript를 다 작성했으면`npm run build`(`package.json`파일에 `"build : "webpack"`으로 설정했기 때문에 build명령어 사용)를 함 -> `tsconfig.json`에 `"outDir" : "./dist"`라고 했기 때문에 dist폴더아래에 `app.js`파일이 생김 (`.eslintignore`파일에 dist폴더도 추가해야됨 : node_modules와 함께 읽어지면 안되는 파일이라 설정해줌)
+
+![image-20210311155108034](Typescript_실전.assets/image-20210311155108034.png)
+
+### (참고) Destructuring
+
+> [구조분해문법](https://joshua1988.github.io/vue-camp/es6/destructuring.html#%EA%B8%B0%EC%A1%B4-%EC%9E%90%EB%B0%94%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8%EC%97%90%EC%84%9C%EC%9D%98-%EA%B5%AC%EC%A1%B0)
+
+```js
+var josh = {
+  language: 'javascript',
+  position: 'front-end',
+  area: 'pangyo',
+  hobby: 'singing',
+  age: '102'
+};
+
+var { language, position, area, hobby, age } = josh;
+console.log(language); // javascript
+console.log(position); // front-end
+console.log(area); // pangyo
+console.log(hobby); // singing
+console.log(age); // 102
+```
+
+### strict 옵션
+
+> `tsconfig.json`에 설정
+>
+> - 타입스크립트 설정 파일에 아래 설정을 추가(강하게 타입을 설정함)
+>
+> ```json
+> {
+>   "strict": true, 
+>     //위 strict를 true로 하면 아래 옵션들이 모두 true로 자동으로 적용됨
+>   "strictNullChecks": true, // null 값 체크
+>   "strictFunctionTypes": true, // callback으로 보내는 function의 타입까지 엄격하게 검사
+>   "strictBindCallApply": true,
+>   "strictPropertyInitialization": true,
+>   "noImplicitThis": true,
+>   "alwaysStrict": true,
+> }
+> ```
+>
+> - `any`로 되어 있는 타입을 최대한 더 적절한 타입으로 변환
+> - `as`와 같은 키워드를 최대한 사용하지 않도록 고민해서 변경
+
+- `app.ts` strict옵션 적용시 type을 더 정확하게 처리하고 null값도 처리해야됨
+
+![image-20210311171350125](Typescript_실전.assets/image-20210311171350125.png)
+
+![image-20210311171748292](Typescript_실전.assets/image-20210311171748292.png)
+
+![image-20210311171949668](Typescript_실전.assets/image-20210311171949668.png)
+
+- 타입단언 
+
+> `!` 보단 `?`를 사용해라
+
+```typescript
+interface Hero {
+  name: string;
+  skill: string;
+}
+
+// : type annotation
+// const capt: Hero = {
+//   name: 'capt',
+//   skill: 'sheild',
+// };
+// const capt: Hero = {};
+
+// as : 타입단언은 주의해서 써야된다
+const capt = {} as Hero;
+// 아래의 name과 skill을 정의하지 않고 capt만 선언해도 오류가 나지 않음 추후에 문제가 될 수 있음
+capt.name = 'capt';
+capt.skill = 'shild';
+
+// ! : non null 타입단언
+const a: string | null;
+// a가 null이 아닐거라고 단언을 하면 문제가 될 수 있음(null이 안들어온다는 확신이 있을 때 사용해야됨)
+// a!;
+
+// ? : 옵셔널 체이닝 오퍼레이터
+    // if (recoveredList == null || recoveredList === undefined) {
+    //   return;
+    // } else {
+    //   recoveredList.appendChild(li);
+    // }
+    // ? 는 위 주석 코드를 한줄로 줄인것!
+    recoveredList?.appendChild(li);
+```
+
+- `app.ts`수정
+
+```typescript
+// // 라이브러리 로딩
+// import 변수명 from '라이브러리 이름';
+// // 변수, 함수 임포트 문법
+// import {} from '파일 상대 경로';
+// axios의 응답으로 오는 type이 AxiosResponse 반환값 Promise<AxiosResponse<any>> 이런식으로 type을 적음
+import axios, { AxiosResponse } from 'axios';
+import Chart from 'chart.js';
+// import * as Chart from 'chart.js; //몇몇 라이브러리는 이렇게 적어줘야 에러가
+// 타입 모듈
+import {
+  CountrySummaryResponse,
+  CovidSummaryResponse,
+  Country,
+  CountrySummaryInfo,
+} from './covid/index';
+
+// utils
+// document.querySelctor는 $로 사용가능하게 함
+function $(selector: string) {
+  return document.querySelector(selector);
+}
+// T extends HTMLHtmlElement = HTMLDivElement은 type을 받지 않는다면 default값으로 type을 HTMLDivElement로 지정해줄 수 있다
+// function $<T extends HTMLHtmlElement = HTMLDivElement>(selector: string) {
+//   const element = document.querySelector(selector);
+//   // DOM접근함수로 넘겼던 type으로 return될거라고 단언할 수 있다 그러면 아래 변수를 선언할 때 as로 단언하지 않아도 됨!
+//   // 여기서 주의할 점은 오타를 주의할 것! -> 이렇게 쓰는게 더 유용
+//   return element as T;
+// }
+// 예시
+// const temp = $<HTMLParagraphElement>('.abc');
+
+// 이미 기존에 있는 type(new Date)이기때문에 Date | string | number 이라고 type을 정의할 수있음, 대부분 Date는 string으로 들어올 수 있어서 string타입까지 받게 하면됨
+function getUnixTimestamp(date: Date | string) {
+  return new Date(date).getTime();
+}
+// DOM
+// let a: Element | HTMLElement | HTMLParagraphElement;
+// as : 타입단언, 달러표시의 결과가 어떤 타입(확장됨) 인지 단언함
+// 어떤태그의 확장된 element인지 index.html에서 보고 서로 타입간 호환할수있는형태로 타입을 정해줌
+const confirmedTotal = $('.confirmed-total') as HTMLSpanElement;
+const deathsTotal = $('.deaths') as HTMLParagraphElement;
+const recoveredTotal = $('.recovered') as HTMLParagraphElement;
+const lastUpdatedTime = $('.last-updated-time') as HTMLParagraphElement;
+//strict as로 정확한 type을 단언하지 않아서 아래 해당 변수를 사용한 코드가 에러가 남 -> HTMLOListElement로 type을 단언해줌
+// const rankList = $('.rank-list');
+const rankList = $('.rank-list') as HTMLOListElement;
+// const deathsList = $('.deaths-list');
+const deathsList = $('.deaths-list') as HTMLOListElement;
+// const recoveredList = $('.recovered-list');
+const recoveredList = $('.recovered-list') as HTMLOListElement;
+const deathSpinner = createSpinnerElement('deaths-spinner');
+const recoveredSpinner = createSpinnerElement('recovered-spinner');
+
+// 로딩되고있다고 인지시켜주는 spinner
+function createSpinnerElement(id: string) {
+  const wrapperDiv = document.createElement('div');
+  wrapperDiv.setAttribute('id', id);
+  wrapperDiv.setAttribute(
+    'class',
+    'spinner-wrapper flex justify-center align-center'
+  );
+  const spinnerDiv = document.createElement('div');
+  spinnerDiv.setAttribute('class', 'ripple-spinner');
+  spinnerDiv.appendChild(document.createElement('div'));
+  spinnerDiv.appendChild(document.createElement('div'));
+  wrapperDiv.appendChild(spinnerDiv);
+  return wrapperDiv;
+}
+
+// state
+let isDeathLoading = false;
+
+// api
+function fetchCovidSummary(): Promise<AxiosResponse<CovidSummaryResponse>> {
+  const url = 'https://api.covid19api.com/summary';
+  return axios.get(url);
+}
+
+enum CovidStatus {
+  Confirmed = 'confirmed',
+  Recovered = 'recovered',
+  Deaths = 'deaths',
+}
+
+function fetchCountryInfo(
+  // countryName: string,
+  // strict
+  countryName: string | undefined,
+  status: CovidStatus // enum
+): Promise<AxiosResponse<CountrySummaryResponse>> {
+  // status params: confirmed, recovered, deaths
+  const url = `https://api.covid19api.com/country/${countryName}/status/${status}`;
+  return axios.get(url);
+}
+
+// methods
+function startApp() {
+  setupData();
+  initEvents();
+}
+
+// events
+function initEvents() {
+  // strict를 설정했을 때 null값처리
+  if (!rankList) {
+    return;
+  }
+  rankList.addEventListener('click', handleListClick);
+}
+
+// async -> js를 ts로 바꿀 때 오류가 남 -> 컴파일 옵션추가(lib : ES2015)
+// (상위) Element > HTMLElement > HTMLDivElement (하위) 순으로 확장됨
+// Event > UIEvent > MouseEvent 순으로 확장됨
+// strict옵션 = event : MouseEvent -> Event로 바꿔야에러가 사라짐 WHY?? MouseEvent는 Event에서 확장된 것이기 때문에 strict는 정확한 type을 써줘야돼서 Event로 type을 변경함
+async function handleListClick(event: Event) {
+  let selectedId;
+  if (
+    event.target instanceof HTMLParagraphElement ||
+    event.target instanceof HTMLSpanElement
+  ) {
+    // selectedId = event.target.parentElement.id;
+    // strict : 위 코드를 삼항연산자로 null값처리
+    selectedId = event.target.parentElement
+      ? event.target.parentElement.id
+      : undefined;
+  }
+  if (event.target instanceof HTMLLIElement) {
+    selectedId = event.target.id;
+  }
+  if (isDeathLoading) {
+    return;
+  }
+  clearDeathList();
+  clearRecoveredList();
+  startLoadingAnimation();
+  isDeathLoading = true;
+  const { data: deathResponse } = await fetchCountryInfo(
+    selectedId,
+    // enum의 Deaths값을 넘겨줌(CovidStatus가 enum으로 돼있고 안에 어떤 속성이 있는지 자동완성으로 알 수 있다)
+    CovidStatus.Deaths
+  );
+  const { data: recoveredResponse } = await fetchCountryInfo(
+    selectedId,
+    CovidStatus.Recovered
+  );
+  const { data: confirmedResponse } = await fetchCountryInfo(
+    selectedId,
+    CovidStatus.Confirmed
+  );
+  endLoadingAnimation();
+  setDeathsList(deathResponse);
+  setTotalDeathsByCountry(deathResponse);
+  setRecoveredList(recoveredResponse);
+  setTotalRecoveredByCountry(recoveredResponse);
+  setChartData(confirmedResponse);
+  isDeathLoading = false;
+}
+// data가 CountrySummaryResponse 타입이면 CountrySummaryResponsesms  CountrySummaryInfo 이루어진 배열이기 떄문에 안의 a,b 요소는 CountrySummaryInfo 타입이 된다
+function setDeathsList(data: CountrySummaryResponse) {
+  const sorted = data.sort(
+    (a: CountrySummaryInfo, b: CountrySummaryInfo) =>
+      getUnixTimestamp(b.Date) - getUnixTimestamp(a.Date)
+  );
+  sorted.forEach((value: CountrySummaryInfo) => {
+    const li = document.createElement('li');
+    li.setAttribute('class', 'list-item-b flex align-center');
+    const span = document.createElement('span');
+    // span의 textContent는 string인데 value의 Cases는 number이기 때문에 type을 맞추기 위해 toString으로 맞춰줌
+    span.textContent = value.Cases.toString();
+    span.setAttribute('class', 'deaths');
+    const p = document.createElement('p');
+    p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
+    li.appendChild(span);
+    li.appendChild(p);
+    // if (!deathsList) {
+    // return;
+    // 매번 이렇게 null값처리를 할 수없으니 변수를 선언할때 type을 제대로 선언해줌
+    // }
+    //  !(non null 타입단언) : 이건 null이 아니다 라고 단언하는 것
+    deathsList!.appendChild(li);
+  });
+}
+
+function clearDeathList() {
+  deathsList.innerHTML = '';
+  // deathsList.innerHTML = null;
+}
+
+function setTotalDeathsByCountry(data: CountrySummaryResponse) {
+  // deathsTotal은 위에 class deaths로 잡은 DOM Element
+  deathsTotal.innerText = data[0].Cases.toString();
+}
+
+function setRecoveredList(data: CountrySummaryResponse) {
+  const sorted = data.sort(
+    (a: CountrySummaryInfo, b: CountrySummaryInfo) =>
+      getUnixTimestamp(b.Date) - getUnixTimestamp(a.Date)
+  );
+  sorted.forEach((value: CountrySummaryInfo) => {
+    const li = document.createElement('li');
+    li.setAttribute('class', 'list-item-b flex align-center');
+    const span = document.createElement('span');
+    span.textContent = value.Cases.toString();
+    span.setAttribute('class', 'recovered');
+    const p = document.createElement('p');
+    p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
+    li.appendChild(span);
+    li.appendChild(p);
+    // ? : 옵셔널 체이닝 오퍼레이터
+    // if (recoveredList == null || recoveredList === undefined) {
+    //   return;
+    // } else {
+    //   recoveredList.appendChild(li);
+    // }
+    // ? 는 위 주석 코드를 한줄로 줄인것!
+    recoveredList?.appendChild(li);
+  });
+}
+
+function clearRecoveredList() {
+  // recoveredList.innerHTML = null;
+  recoveredList.innerHTML = '';
+}
+
+function setTotalRecoveredByCountry(data: CountrySummaryResponse) {
+  recoveredTotal.innerText = data[0].Cases.toString();
+}
+
+function startLoadingAnimation() {
+  deathsList.appendChild(deathSpinner);
+  recoveredList.appendChild(recoveredSpinner);
+}
+
+function endLoadingAnimation() {
+  deathsList.removeChild(deathSpinner);
+  recoveredList.removeChild(recoveredSpinner);
+}
+
+async function setupData() {
+  const { data } = await fetchCovidSummary();
+  setTotalConfirmedNumber(data);
+  setTotalDeathsByWorld(data);
+  setTotalRecoveredByWorld(data);
+  setCountryRanksByConfirmedCases(data);
+  setLastUpdatedTimestamp(data);
+}
+//   renderChart(chartData, chartLabel);이렇게 보낼때 data는 number 배열, label은 string배열
+function renderChart(data: number[], labels: string[]) {
+  // 방법 2개 있음 아래처럼 lineChart를 따로 분리해서 타입단언 해도되고, ctx에서 바로 타입단언을 해줘도됨
+  const lineChart = $('#lineChart') as HTMLCanvasElement;
+  const ctx = lineChart.getContext('2d');
+  Chart.defaults.global.defaultFontColor = '#f5eaea';
+  Chart.defaults.global.defaultFontFamily = 'Exo 2';
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Confirmed for the last two weeks',
+          backgroundColor: '#feb72b',
+          borderColor: '#feb72b',
+          data,
+        },
+      ],
+    },
+    options: {},
+  });
+}
+
+function setChartData(data: CountrySummaryResponse) {
+  const chartData = data
+    .slice(-14) // 최근 14일(2주)
+    .map((value: CountrySummaryInfo) => value.Cases);
+  const chartLabel = data
+    .slice(-14)
+    .map((value: CountrySummaryInfo) =>
+      new Date(value.Date).toLocaleDateString().slice(5, -1)
+    );
+  renderChart(chartData, chartLabel);
+}
+
+function setTotalConfirmedNumber(data: CovidSummaryResponse) {
+  confirmedTotal.innerText = data.Countries.reduce(
+    // 각 요소를 더해서 누적해나감
+    (total: number, current: Country) => (total += current.TotalConfirmed),
+    // 초기값은 0
+    0
+  ).toString(); // 안의 값이 숫자! 문자로 바꾸는 api가 toString()
+}
+
+function setTotalDeathsByWorld(data: CovidSummaryResponse) {
+  deathsTotal.innerText = data.Countries.reduce(
+    (total: number, current: Country) => (total += current.TotalDeaths),
+    0
+  ).toString();
+}
+
+function setTotalRecoveredByWorld(data: CovidSummaryResponse) {
+  recoveredTotal.innerText = data.Countries.reduce(
+    (total: number, current: Country) => (total += current.TotalRecovered),
+    0
+  ).toString();
+}
+
+function setCountryRanksByConfirmedCases(data: CovidSummaryResponse) {
+  const sorted = data.Countries.sort(
+    (a: Country, b: Country) => b.TotalConfirmed - a.TotalConfirmed
+  );
+  sorted.forEach((value: Country) => {
+    const li = document.createElement('li');
+    li.setAttribute('class', 'list-item flex align-center');
+    li.setAttribute('id', value.Slug);
+    const span = document.createElement('span');
+    span.textContent = value.TotalConfirmed.toString();
+    span.setAttribute('class', 'cases');
+    const p = document.createElement('p');
+    p.setAttribute('class', 'country');
+    p.textContent = value.Country;
+    li.appendChild(span);
+    li.appendChild(p);
+    rankList.appendChild(li);
+  });
+}
+
+function setLastUpdatedTimestamp(data: CovidSummaryResponse) {
+  lastUpdatedTime.innerText = new Date(data.Date).toLocaleString();
+}
+
+startApp();
+
+```
+
+### utils
+
+```typescript
+// utils
+// 1번째 방법
+// document.querySelctor는 $로 사용가능하게 함
+function $(selector: string) {
+  return document.querySelector(selector);
+}
+
+// 2번째 방법 제네릭 이용
+// T extends HTMLHtmlElement = HTMLDivElement은 type을 받지 않는다면 default값으로 type을 HTMLDivElement로 지정해줄 수 있다
+function $<T extends HTMLHtmlElement = HTMLDivElement>(selector: string) {
+  const element = document.querySelector(selector);
+  // DOM접근함수로 넘겼던 type으로 return될거라고 단언할 수 있다 그러면 아래 변수를 선언할 때 as로 단언하지 않아도 됨!
+  // 여기서 주의할 점은 오타를 주의할 것! -> 이렇게 쓰는게 더 유용
+  return element as T;
+}
+// 2번 예시
+const temp = $<HTMLParagraphElement>('.abc');
+//1번
+const confirmedTotal = $('.confirmed-total') as HTMLSpanElement;
+// 2번
+const confirmedTotal = $<HTMLSpanElement>('.confirmed-total');
+// 1번
+const deathsTotal = $('.deaths') as HTMLParagraphElement;
+// 2번
+const deathsTotal = $<HTMLParagraphElement>('.deaths');
+// 1번
+const recoveredTotal = $('.recovered') as HTMLParagraphElement;
+// 2번
+const recoveredTotal = $<HTMLParagraphElement>('.recovered');
+// 1번
+const lastUpdatedTime = $('.last-updated-time') as HTMLParagraphElement;
+// 2번
+const lastUpdatedTime = $<HTMLParagraphElement>('.last-updated-time');
 ```
 

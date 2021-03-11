@@ -2,6 +2,7 @@
 // import 변수명 from '라이브러리 이름';
 // // 변수, 함수 임포트 문법
 // import {} from '파일 상대 경로';
+// axios의 응답으로 오는 type이 AxiosResponse 반환값 Promise<AxiosResponse<any>> 이런식으로 type을 적음
 import axios, { AxiosResponse } from 'axios';
 import Chart from 'chart.js';
 // import * as Chart from 'chart.js; //몇몇 라이브러리는 이렇게 적어줘야 에러가
@@ -18,7 +19,17 @@ import {
 function $(selector: string) {
   return document.querySelector(selector);
 }
-// 이미 기존에 있는 type(new Date)이기때문에 Date | string | number 이라고 type을 정의할 수있음
+// T extends HTMLHtmlElement = HTMLDivElement은 type을 받지 않는다면 default값으로 type을 HTMLDivElement로 지정해줄 수 있다
+// function $<T extends HTMLHtmlElement = HTMLDivElement>(selector: string) {
+//   const element = document.querySelector(selector);
+//   // DOM접근함수로 넘겼던 type으로 return될거라고 단언할 수 있다 그러면 아래 변수를 선언할 때 as로 단언하지 않아도 됨!
+//   // 여기서 주의할 점은 오타를 주의할 것! -> 이렇게 쓰는게 더 유용
+//   return element as T;
+// }
+// 예시
+// const temp = $<HTMLParagraphElement>('.abc');
+
+// 이미 기존에 있는 type(new Date)이기때문에 Date | string | number 이라고 type을 정의할 수있음, 대부분 Date는 string으로 들어올 수 있어서 string타입까지 받게 하면됨
 function getUnixTimestamp(date: Date | string) {
   return new Date(date).getTime();
 }
@@ -30,12 +41,17 @@ const confirmedTotal = $('.confirmed-total') as HTMLSpanElement;
 const deathsTotal = $('.deaths') as HTMLParagraphElement;
 const recoveredTotal = $('.recovered') as HTMLParagraphElement;
 const lastUpdatedTime = $('.last-updated-time') as HTMLParagraphElement;
-const rankList = $('.rank-list');
-const deathsList = $('.deaths-list');
-const recoveredList = $('.recovered-list');
+//strict as로 정확한 type을 단언하지 않아서 아래 해당 변수를 사용한 코드가 에러가 남 -> HTMLOListElement로 type을 단언해줌
+// const rankList = $('.rank-list');
+const rankList = $('.rank-list') as HTMLOListElement;
+// const deathsList = $('.deaths-list');
+const deathsList = $('.deaths-list') as HTMLOListElement;
+// const recoveredList = $('.recovered-list');
+const recoveredList = $('.recovered-list') as HTMLOListElement;
 const deathSpinner = createSpinnerElement('deaths-spinner');
 const recoveredSpinner = createSpinnerElement('recovered-spinner');
 
+// 로딩되고있다고 인지시켜주는 spinner
 function createSpinnerElement(id: string) {
   const wrapperDiv = document.createElement('div');
   wrapperDiv.setAttribute('id', id);
@@ -67,7 +83,9 @@ enum CovidStatus {
 }
 
 function fetchCountryInfo(
-  countryName: string,
+  // countryName: string,
+  // strict
+  countryName: string | undefined,
   status: CovidStatus // enum
 ): Promise<AxiosResponse<CountrySummaryResponse>> {
   // status params: confirmed, recovered, deaths
@@ -83,17 +101,28 @@ function startApp() {
 
 // events
 function initEvents() {
+  // strict를 설정했을 때 null값처리
+  if (!rankList) {
+    return;
+  }
   rankList.addEventListener('click', handleListClick);
 }
 
 // async -> js를 ts로 바꿀 때 오류가 남 -> 컴파일 옵션추가(lib : ES2015)
-async function handleListClick(event: MouseEvent) {
+// (상위) Element > HTMLElement > HTMLDivElement (하위) 순으로 확장됨
+// Event > UIEvent > MouseEvent 순으로 확장됨
+// strict옵션 = event : MouseEvent -> Event로 바꿔야에러가 사라짐 WHY?? MouseEvent는 Event에서 확장된 것이기 때문에 strict는 정확한 type을 써줘야돼서 Event로 type을 변경함
+async function handleListClick(event: Event) {
   let selectedId;
   if (
     event.target instanceof HTMLParagraphElement ||
     event.target instanceof HTMLSpanElement
   ) {
-    selectedId = event.target.parentElement.id;
+    // selectedId = event.target.parentElement.id;
+    // strict : 위 코드를 삼항연산자로 null값처리
+    selectedId = event.target.parentElement
+      ? event.target.parentElement.id
+      : undefined;
   }
   if (event.target instanceof HTMLLIElement) {
     selectedId = event.target.id;
@@ -126,7 +155,7 @@ async function handleListClick(event: MouseEvent) {
   setChartData(confirmedResponse);
   isDeathLoading = false;
 }
-
+// data가 CountrySummaryResponse 타입이면 CountrySummaryResponsesms  CountrySummaryInfo 이루어진 배열이기 떄문에 안의 a,b 요소는 CountrySummaryInfo 타입이 된다
 function setDeathsList(data: CountrySummaryResponse) {
   const sorted = data.sort(
     (a: CountrySummaryInfo, b: CountrySummaryInfo) =>
@@ -136,18 +165,25 @@ function setDeathsList(data: CountrySummaryResponse) {
     const li = document.createElement('li');
     li.setAttribute('class', 'list-item-b flex align-center');
     const span = document.createElement('span');
+    // span의 textContent는 string인데 value의 Cases는 number이기 때문에 type을 맞추기 위해 toString으로 맞춰줌
     span.textContent = value.Cases.toString();
     span.setAttribute('class', 'deaths');
     const p = document.createElement('p');
     p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
     li.appendChild(span);
     li.appendChild(p);
-    deathsList.appendChild(li);
+    // if (!deathsList) {
+    // return;
+    // 매번 이렇게 null값처리를 할 수없으니 변수를 선언할때 type을 제대로 선언해줌
+    // }
+    //  !(non null 타입단언) : 이건 null이 아니다 라고 단언하는 것
+    deathsList!.appendChild(li);
   });
 }
 
 function clearDeathList() {
-  deathsList.innerHTML = null;
+  deathsList.innerHTML = '';
+  // deathsList.innerHTML = null;
 }
 
 function setTotalDeathsByCountry(data: CountrySummaryResponse) {
@@ -170,12 +206,20 @@ function setRecoveredList(data: CountrySummaryResponse) {
     p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
     li.appendChild(span);
     li.appendChild(p);
-    recoveredList.appendChild(li);
+    // ? : 옵셔널 체이닝 오퍼레이터
+    // if (recoveredList == null || recoveredList === undefined) {
+    //   return;
+    // } else {
+    //   recoveredList.appendChild(li);
+    // }
+    // ? 는 위 주석 코드를 한줄로 줄인것!
+    recoveredList?.appendChild(li);
   });
 }
 
 function clearRecoveredList() {
-  recoveredList.innerHTML = null;
+  // recoveredList.innerHTML = null;
+  recoveredList.innerHTML = '';
 }
 
 function setTotalRecoveredByCountry(data: CountrySummaryResponse) {
@@ -200,8 +244,9 @@ async function setupData() {
   setCountryRanksByConfirmedCases(data);
   setLastUpdatedTimestamp(data);
 }
-
+//   renderChart(chartData, chartLabel);이렇게 보낼때 data는 number 배열, label은 string배열
 function renderChart(data: number[], labels: string[]) {
+  // 방법 2개 있음 아래처럼 lineChart를 따로 분리해서 타입단언 해도되고, ctx에서 바로 타입단언을 해줘도됨
   const lineChart = $('#lineChart') as HTMLCanvasElement;
   const ctx = lineChart.getContext('2d');
   Chart.defaults.global.defaultFontColor = '#f5eaea';
@@ -225,7 +270,7 @@ function renderChart(data: number[], labels: string[]) {
 
 function setChartData(data: CountrySummaryResponse) {
   const chartData = data
-    .slice(-14)
+    .slice(-14) // 최근 14일(2주)
     .map((value: CountrySummaryInfo) => value.Cases);
   const chartLabel = data
     .slice(-14)
@@ -241,7 +286,7 @@ function setTotalConfirmedNumber(data: CovidSummaryResponse) {
     (total: number, current: Country) => (total += current.TotalConfirmed),
     // 초기값은 0
     0
-  ).toString();
+  ).toString(); // 안의 값이 숫자! 문자로 바꾸는 api가 toString()
 }
 
 function setTotalDeathsByWorld(data: CovidSummaryResponse) {
