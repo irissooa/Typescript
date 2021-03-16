@@ -6,19 +6,22 @@ import { RootState } from "./state";
 enum ActionTypes {
   FETCH_NEWS = "FETCH_NEWS"
 }
-
+// ActionContext를 확장시킴
+// type이 store 내부적으로 아직 확장이 잘 안돼있어서 확장시킴
 type MyActionContext = {
   commit<K extends keyof Mutations>(
     key: K,
     payload: Parameters<Mutations[K]>[1]
   ): ReturnType<Mutations[K]>;
+  // ActionContext는 제네릭으로 두개를 받음 첫번째는 state, 두번째는 rootState에 들어가는 제네릭
 } & Omit<ActionContext<RootState, RootState>, "commit">;
 
 const actions = {
   async [ActionTypes.FETCH_NEWS](context: MyActionContext, payload?: any) {
+    // payload는 거의 사용하지않음 옵션
     const { data } = await fetchNews();
     context.commit(MutationTypes.SET_NEWS, data);
-    return data;
+    return data; // dispatch를 했을 때 response의 반환값은 NewsItem[]이라고 추론됨
   }
 };
 

@@ -35,6 +35,8 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
+    // 타입스크립트 선언 파일이 인식될 수 있게 설정
+    // types폴더의 모든 파일의 .d.ts확장자 모두
     "src/types/**/*.d.ts"
   ],
   "exclude": [

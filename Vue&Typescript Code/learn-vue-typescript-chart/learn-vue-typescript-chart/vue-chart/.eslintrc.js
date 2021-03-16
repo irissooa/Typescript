@@ -16,6 +16,7 @@ module.exports = {
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
+    // off, warn, error가 있는데 off로 camelcase를 꺼줘서 $_Chart 이름을 쓸 수 있게 함
     "@typescript-eslint/camelcase": "off"
   }
 };

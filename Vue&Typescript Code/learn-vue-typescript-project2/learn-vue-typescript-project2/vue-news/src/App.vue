@@ -36,9 +36,12 @@ export default Vue.extend({
   },
   async created() {
     this.$store.getters.fetchedNews;
+    // state상태를 바꾸는건 mutation에서만 일어나야됨!(에러가남)
     // this.$store.state.news = 10;
     // this.$store.state.news;
+    // 10이 아니라 NewsItem[]type이 와야된다고 에러를 보여줌
     // this.$store.commit(MutationTypes.SET_NEWS, 10);
+    // 커스텀했기 때문에 dispatch까지 적었을 때 보이는 내용들이 우리가 정의한 코드가 보임
     // const response = await this.$store.dispatch(ActionTypes.FETCH_NEWS);
     bus.$on("on:progress", this.onProgress);
     bus.$on("off:progress", this.offProgress);
