@@ -2940,7 +2940,7 @@ export default Vue.extend({
 
 #### (참고)`export =` and `import = require()`
 
-> [export = 문법](https://www.typescriptlang.org/docs/handbook/modules.html#export--and-import--require)
+> [export = 문법 참고](https://www.typescriptlang.org/docs/handbook/modules.html#export--and-import--require)
 
 - 예시
 
