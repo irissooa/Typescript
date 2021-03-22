@@ -1,6 +1,10 @@
 # Vue & Typescript
 
 > [Vue.js Typescript공식문서](https://vuejs.org/v2/guide/typescript.html)
+>
+> - vscode 파스칼 케이스로 자동완성
+>
+> ![image-20210323002142028](Vue&Typescript.assets/image-20210323002142028.png)
 
 [toc]
 
