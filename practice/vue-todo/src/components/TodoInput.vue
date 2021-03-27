@@ -1,7 +1,8 @@
 <template>
   <div class="inputBox shadow">
     <input type="text" v-model="newTodoItem" @keyup.enter="addTodo">
-    <span class="addContainer" v-on:click="addTodo">
+    <span class="addContainer" @click="addTodo">
+      <!-- aria-hidden="true" 스크린 리더와 같은 보조기술 사용자의 콘텐츠 탐색을 제한합니다. aria-hidden이 "true"로 설정된 콘텐츠는 스크린 리더의 가상 커서에서 탐색되지 않습니다.  -->
       <i class="addBtn fas fa-plus" aria-hidden="true"></i>
     </span>
 
