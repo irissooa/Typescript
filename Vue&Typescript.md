@@ -2800,7 +2800,7 @@ npm install chart.js --save
 2. Chart.js의 공식문서에서 chart를 `App.vue`의 `mounted`에 넣고 타입스크립트로 바꿈	
 3. 차트 라이브러리 플러그인화
 
-- `chart.js`라이브러리를 인식하기위해 ts선언파일이 필요함 or `npm install @types/chart.js`를 찾아서 코드적음(`npm install --save @types/chart.js`)
+- `chart.js`라이브러리를 인식하기위해 ts선언파일이 필요함 or `npm install @types/chart.js`를 찾아서 코드적음(`npm install --save @types/chart.js`, `yarn add @types/chart.js`)
 - [TypeScript Type Search](https://www.typescriptlang.org/dt/search?search=)여기서 `chart.js`이게 찾아지지 않는다면 플러그인으로 따로 만들어 줘야됨
 - `plugins` > `ChartPlugin.ts`파일을 만들어 라이브러리 선언파일을 만들어줌
 
