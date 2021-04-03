@@ -1874,7 +1874,7 @@ export default new VueRouter({
 });
 ```
 
-- `api > index.js`
+- Before `api > index.js`
 
 ```js
 import axios from 'axios';
@@ -1924,7 +1924,7 @@ export {
 }
 ```
 
-- Before `api > index.ts`
+- After`api > index.ts`
 
 ```ts
 import axios, { AxiosPromise } from "axios";
