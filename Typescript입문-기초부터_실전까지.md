@@ -159,7 +159,7 @@ result.toLocaleString();
 
 ```
 
-![image-20210305154213913](C:\Users\multicampus\AppData\Roaming\Typora\typora-user-images\image-20210305154213913.png)
+![image](Typescript입문-기초부터_실전까지.assets/image-20210305154213913.png)
 
 ### typescript 컴파일
 
