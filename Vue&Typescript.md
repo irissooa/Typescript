@@ -1,12 +1,14 @@
 # Vue & Typescript
 
+[toc]
+
 > [Vue.js Typescript공식문서](https://vuejs.org/v2/guide/typescript.html)
 >
 > - vscode 파스칼 케이스로 자동완성
 >
 > ![image-20210323002142028](Vue&Typescript.assets/image-20210323002142028.png)
 
-[toc]
+
 
 1. vue cli 버전 업데이트 하라고 뜬다면 업데이트를 해줌
 
@@ -2977,3 +2979,186 @@ export default Vue.extend({
   ```
 
   
+
+## ref 타이핑
+
+> [ref 속성](https://joshua1988.github.io/vue-camp/ts/refs.html)
+
+### ref 속성이란?
+
+> 뷰에서 특정 DOM이나 컴포넌트의 정보를 접근하기 위해 사용하는 속성
+
+```html
+<div ref="my"></div>
+
+<script>
+new Vue({
+  mounted() {
+    // $를 쓴 뒤 DOM에 적은 my로 접근함
+    console.log(this.$refs.my); // HTMLDivElement
+  }  
+})
+</script>
+```
+
+### ref 속성 타입 정의 방법
+
+```html
+<template>
+  <div>
+    <div ref="my"></div>
+  </div>
+</template>
+
+<script lang="ts">
+import Vue, { VueConstructor } from "vue";
+
+export default (Vue as VueConstructor<
+  Vue & { $refs: { my: HTMLDivElement } }
+>).extend({
+  mounted() {
+    this.$refs.my; // HTMLDivElement
+  }
+});
+</script>
+```
+
+![image-20210403122620706](Vue&Typescript.assets/image-20210403122620706.png)
+
+![image-20210403123238288](Vue&Typescript.assets/image-20210403123238288.png)
+
+
+
+### 반복적인 타입 코드 줄이는 방법
+
+![image-20210403123344340](Vue&Typescript.assets/image-20210403123344340.png)
+
+```typescript
+// src/types.ts
+type MyVue<T> = VueConstructor<Vue & T>;
+type MyVueRefs<T> = VueConstructor<Vue & { $refs: T }>;
+
+// App.vue
+export default (Vue as MyVueRefs<{ my: HTMLDivElement }>).extend({
+  mounted() {
+    this.$refs.my; // HTMLDivElement
+  }
+});
+```
+
+### 예시
+
+1. Vue export
+
+```typescript
+import Vue from "vue";
+
+export default Vue.extend({});
+```
+
+2.  VueConstructor 이용
+
+> *VueConstructor는 vue내부의 타입이기 때문에 ctrl+space를 하면 자동완성으로 import된다*
+>
+> *VueConstructor 제너릭 안에 Vue와 refs의 type 합집합을 넣겠다*
+
+```typescript
+import Vue, { VueConstructor } from "vue";
+
+export default (Vue as VueConstructor<Vue & {$refs:{myChart:HTMLCanvasElement}}>).extend({});
+```
+
+3. type으로 제너릭 이용
+
+```typescript
+// type > index.ts
+import { VueConstructor } from "vue/types/umd";
+
+type MyVue<T> = VueConstructor<Vue & T>;
+// refs
+export type MyVueRefs<T> = VueConstructor<Vue & { $refs: T }>;
+```
+
+```;
+import Vue from "vue";
+import { MyVueRefs } from "./types/index";
+
+export default (Vue as MyVueRefs<{ myChart: HTMLCanvasElement }>).extend({});
+```
+
+- 전체코드
+
+```vue
+<template>
+  <div>
+    <canvas id="myChart" ref="myChart"></canvas>
+  </div>
+</template>
+
+<script lang="ts">
+import Vue, { VueConstructor } from "vue";
+import { MyVueRefs } from "./types/index";
+// import Chart from "chart.js";
+
+// export default Vue.extend({
+// VueConstructor는 vue내부의 타입이기 때문에 ctrl+space를 하면 자동완성으로 import된다
+// VueConstructor 제너릭 안에 Vue와 refs의 type 합집합을 넣겠다
+// export default (Vue as VueConstructor<
+//   Vue & { $refs: { myChart: HTMLCanvasElement } }
+// >).extend({
+// type으로 제너릭 사용
+export default (Vue as MyVueRefs<{ myChart: HTMLCanvasElement }>).extend({
+  methods: {
+    sayHi() {
+      const canvasElement = this.$refs.myChart;
+    }
+  },
+  mounted() {
+    //  document.getElementById("myChart")이게 canvas element라고 타입단언을 해줌
+    // const canvasElement = document.getElementById(
+    //   "myChart"
+    // ) as HTMLCanvasElement;
+    // ref를 쓰게되면 canvasElement는 type이 Vue | Element | Vue[] | Element[]로 정해진다 그래서 "as HTMLCanvasElement" 이렇게 타입을 단언하지 않더라도 type이 정해져있다
+    const canvasElement = this.$refs.myChart as HTMLCanvasElement;
+    const ctx = canvasElement.getContext("2d");
+    // null값처리
+    if (!ctx) {
+      return;
+    }
+    // 플러그인을 이용해 import를 하지않고 main.ts에 플러그인을 등록했으니 this.$_Chart로 사용할 수 있다
+    const chart = new this.$_Chart(ctx, {
+      // The type of chart we want to create
+      type: "line",
+
+      // The data for our dataset
+      data: {
+        labels: [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July"
+        ],
+        datasets: [
+          {
+            label: "My First dataset",
+            backgroundColor: "rgb(255, 99, 132)",
+            borderColor: "rgb(255, 99, 132)",
+            data: [0, 10, 5, 2, 20, 30, 45]
+          }
+        ]
+      },
+
+      // Configuration options go here
+      options: {}
+    });
+  }
+});
+</script>
+
+<style scoped></style>
+
+```
+
