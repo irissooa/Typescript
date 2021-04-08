@@ -24,10 +24,12 @@ export default {
 .lds-facebook {
   display: inline-block;
   position: absolute;
-  width: 64px;
+  /* width: 64px;
   height: 64px;
   top: 47%;
-  left: 47%;
+  left: 47%; */
+  width : 50vw;
+  height:50vh;
 }
 .lds-facebook div {
   display: inline-block;
